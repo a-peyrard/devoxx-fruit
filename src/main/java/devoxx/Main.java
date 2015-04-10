@@ -1,5 +1,6 @@
 package devoxx;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
 import java.io.BufferedReader;
@@ -90,12 +91,15 @@ public class Main {
 
 			for (; ; ) {
 				String ask = console.ask();
-				Optional<Fruit> fruit = Fruit.fromLabel(ask);;
-				if (!fruit.isPresent()) {
-					console.writeLine("unknown fruit");
-					continue;
+				Iterable<String> fruitsLabels = Splitter.on(",").trimResults().split(ask);
+				for (String fruitLabel : fruitsLabels) {
+					Optional<Fruit> fruit = Fruit.fromLabel(fruitLabel);
+					if (!fruit.isPresent()) {
+						console.writeLine("unknown fruit: "+fruitLabel);
+						continue;
+					}
+					basket.fruits.add(fruit.get());
 				}
-				basket.fruits.add(fruit.get());
 
 				console.writeLine(String.valueOf(basket.getPrice(discounts)));
 			}
