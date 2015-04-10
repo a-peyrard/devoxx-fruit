@@ -45,18 +45,24 @@ public class Main {
 	}
 
 	static class Discount {
-		final Fruit fruit;
+		final Set<Fruit> fruits;
 		final int batchSize;
 		final int discount;
 
 		Discount(Fruit fruit, int batchSize, int discount) {
-			this.fruit = fruit;
+			this.fruits = ImmutableSet.of(fruit);
 			this.batchSize = batchSize;
 			this.discount = discount;
 		}
 
-		public Fruit getFruit() {
-			return fruit;
+		Discount(int batchSize, int discount, Fruit... fruits) {
+			this.fruits = ImmutableSet.copyOf(fruits);
+			this.batchSize = batchSize;
+			this.discount = discount;
+		}
+
+		public Set<Fruit> getFruits() {
+			return fruits;
 		}
 
 		public int getBatchSize() {
@@ -75,7 +81,7 @@ public class Main {
 			int price = fruits.stream().mapToInt(Fruit::getPrice).sum();
 			// apply discounts
 			for (Discount discount : discounts) {
-				long count = fruits.stream().filter(f -> discount.getFruit().equals(f)).count();
+				long count = fruits.stream().filter(f -> discount.getFruits().contains(f)).count();
 				long batches = count / discount.getBatchSize();
 				price -= batches * discount.getDiscount();
 			}
@@ -90,7 +96,9 @@ public class Main {
 					new Discount(Fruit.CERISES, 2, 20),
 					new Discount(Fruit.BANANES, 2, Fruit.BANANES.getPrice()),
 					new Discount(Fruit.APPLES, 3, 100),
-					new Discount(Fruit.MELE, 2, 100)
+					new Discount(Fruit.MELE, 2, 100),
+					new Discount(4, 100, Fruit.POMMES, Fruit.APPLES, Fruit.MELE),
+					new Discount(5, 200, Fruit.values())
 			);
 			Basket basket = new Basket();
 
