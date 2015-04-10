@@ -1,5 +1,7 @@
 package devoxx;
 
+import com.google.common.collect.ImmutableList;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -41,14 +43,51 @@ public class Main {
 		}
 	}
 
+	static class Discount {
+		final Fruit fruit;
+		final int batchSize;
+		final int discount;
+
+		Discount(Fruit fruit, int batchSize, int discount) {
+			this.fruit = fruit;
+			this.batchSize = batchSize;
+			this.discount = discount;
+		}
+
+		public Fruit getFruit() {
+			return fruit;
+		}
+
+		public int getBatchSize() {
+			return batchSize;
+		}
+
+		public int getDiscount() {
+			return discount;
+		}
+	}
+
 	static class Basket {
 		final List<Fruit> fruits = new ArrayList<>();
+
+		int getPrice(List<Discount> discounts) {
+			int price = fruits.stream().mapToInt(Fruit::getPrice).sum();
+			// apply discounts
+			for (Discount discount : discounts) {
+				long count = fruits.stream().filter(f -> discount.getFruit().equals(f)).count();
+				long batches = count / discount.getBatchSize();
+				price -= batches * discount.getDiscount();
+			}
+			return price;
+		}
 	}
 
 
 	public static void main(String[] args) throws Exception {
 		try (final Console console = new Console()) {
+			final List<Discount> discounts = ImmutableList.of(new Discount(Fruit.CERISES, 2, 20));
 			Basket basket = new Basket();
+
 			for (; ; ) {
 				String ask = console.ask();
 				Optional<Fruit> fruit = Fruit.fromLabel(ask);;
@@ -58,8 +97,7 @@ public class Main {
 				}
 				basket.fruits.add(fruit.get());
 
-				console.writeLine(String.valueOf(basket.fruits.stream().mapToInt(Fruit::getPrice).sum()));
-
+				console.writeLine(String.valueOf(basket.getPrice(discounts)));
 			}
 		}
 	}
