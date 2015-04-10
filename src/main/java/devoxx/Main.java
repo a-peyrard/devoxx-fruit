@@ -1,5 +1,6 @@
 package devoxx;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -20,7 +21,9 @@ import java.util.Set;
 public class Main {
 
 	static enum Fruit {
-		POMMES(100, "Pommes", "Apples", "Mele"),
+		POMMES(100, "Pommes"),
+		APPLES(100, "Apples"),
+		MELE(100, "Mele"),
 		BANANES(150, "Bananes"),
 		CERISES(75, "Cerises");
 
@@ -85,18 +88,23 @@ public class Main {
 		try (final Console console = new Console()) {
 			final List<Discount> discounts = ImmutableList.of(
 					new Discount(Fruit.CERISES, 2, 20),
-					new Discount(Fruit.BANANES, 2, Fruit.BANANES.getPrice())
+					new Discount(Fruit.BANANES, 2, Fruit.BANANES.getPrice()),
+					new Discount(Fruit.APPLES, 3, 100),
+					new Discount(Fruit.MELE, 2, 100)
 			);
 			Basket basket = new Basket();
 
 			for (; ; ) {
 				String ask = console.ask();
-				Optional<Fruit> fruit = Fruit.fromLabel(ask);
-				if (!fruit.isPresent()) {
-					console.writeLine("unknown fruit: "+ask);
-					continue;
+				Iterable<String> fruitsLabels = Splitter.on(",").trimResults().split(ask);
+				for (String fruitLabel : fruitsLabels) {
+					Optional<Fruit> fruit = Fruit.fromLabel(fruitLabel);
+					if (!fruit.isPresent()) {
+						console.writeLine("unknown fruit: "+fruitLabel);
+						continue;
+					}
+					basket.fruits.add(fruit.get());
 				}
-				basket.fruits.add(fruit.get());
 
 				console.writeLine(String.valueOf(basket.getPrice(discounts)));
 			}
