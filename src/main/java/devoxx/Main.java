@@ -1,6 +1,5 @@
 package devoxx;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
 import java.io.BufferedReader;
@@ -86,20 +85,20 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 		try (final Console console = new Console()) {
-			final List<Discount> discounts = ImmutableList.of(new Discount(Fruit.CERISES, 2, 20));
+			final List<Discount> discounts = ImmutableList.of(
+					new Discount(Fruit.CERISES, 2, 30),
+					new Discount(Fruit.BANANES, 2, Fruit.BANANES.getPrice())
+			);
 			Basket basket = new Basket();
 
 			for (; ; ) {
 				String ask = console.ask();
-				Iterable<String> fruitsLabels = Splitter.on(",").trimResults().split(ask);
-				for (String fruitLabel : fruitsLabels) {
-					Optional<Fruit> fruit = Fruit.fromLabel(fruitLabel);
-					if (!fruit.isPresent()) {
-						console.writeLine("unknown fruit: "+fruitLabel);
-						continue;
-					}
-					basket.fruits.add(fruit.get());
+				Optional<Fruit> fruit = Fruit.fromLabel(ask);
+				if (!fruit.isPresent()) {
+					console.writeLine("unknown fruit: "+ask);
+					continue;
 				}
+				basket.fruits.add(fruit.get());
 
 				console.writeLine(String.valueOf(basket.getPrice(discounts)));
 			}
