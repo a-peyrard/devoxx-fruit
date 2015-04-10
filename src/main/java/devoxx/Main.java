@@ -1,6 +1,7 @@
 package devoxx;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author apeyrard
@@ -18,20 +20,16 @@ import java.util.Optional;
 public class Main {
 
 	static enum Fruit {
-		POMMES("Pommes", 100),
-		BANANES("Bananes", 150),
-		CERISES("Cerises", 75);
+		POMMES(100, "Pommes", "Apples", "Mele"),
+		BANANES(150, "Bananes"),
+		CERISES(75, "Cerises");
 
-		final String label;
+		final Set<String> labels;
 		final int price;
 
-		Fruit(String label, int price) {
-			this.label = label;
+		Fruit(int price, String... labels) {
+			this.labels = ImmutableSet.copyOf(labels);
 			this.price = price;
-		}
-
-		public String getLabel() {
-			return label;
 		}
 
 		public int getPrice() {
@@ -39,7 +37,7 @@ public class Main {
 		}
 
 		static Optional<Fruit> fromLabel(String label) {
-			return Arrays.stream(Fruit.values()).filter(f -> f.getLabel().equals(label)).findFirst();
+			return Arrays.stream(Fruit.values()).filter(f -> f.labels.contains(label)).findFirst();
 		}
 	}
 
@@ -86,7 +84,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		try (final Console console = new Console()) {
 			final List<Discount> discounts = ImmutableList.of(
-					new Discount(Fruit.CERISES, 2, 30),
+					new Discount(Fruit.CERISES, 2, 20),
 					new Discount(Fruit.BANANES, 2, Fruit.BANANES.getPrice())
 			);
 			Basket basket = new Basket();
