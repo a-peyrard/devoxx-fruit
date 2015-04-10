@@ -5,12 +5,64 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * @author apeyrard
  */
 public class Main {
+
+	static enum Fruit {
+		POMMES("Pommes", 100),
+		BANANES("Bananes", 150),
+		CERISES("Cerises", 75);
+
+		final String label;
+		final int price;
+
+		Fruit(String label, int price) {
+			this.label = label;
+			this.price = price;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public int getPrice() {
+			return price;
+		}
+
+		static Optional<Fruit> fromLabel(String label) {
+			return Arrays.stream(Fruit.values()).filter(f -> f.getLabel().equals(label)).findFirst();
+		}
+	}
+
+	static class Basket {
+		final List<Fruit> fruits = new ArrayList<>();
+	}
+
+
+	public static void main(String[] args) throws Exception {
+		try (final Console console = new Console()) {
+			Basket basket = new Basket();
+			for (; ; ) {
+				String ask = console.ask();
+				Optional<Fruit> fruit = Fruit.fromLabel(ask);;
+				if (!fruit.isPresent()) {
+					console.writeLine("unknown fruit");
+					continue;
+				}
+				basket.fruits.add(fruit.get());
+
+				console.writeLine(String.valueOf(basket.fruits.stream().mapToInt(Fruit::getPrice).sum()));
+
+			}
+		}
+	}
 
 	/**
 	 * simple class to manage the input, output from the console
@@ -96,13 +148,6 @@ public class Main {
 		public void close() throws Exception {
 			reader.close();
 			writer.close();
-		}
-	}
-
-	public static void main(String[] args) throws Exception {
-		try (final Console console = new Console()) {
-			Integer age = console.ask(Integer.class, "what is the age of the capitain");
-			console.writeLine("the age is: " + age);
 		}
 	}
 }
